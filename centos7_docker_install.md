@@ -215,7 +215,7 @@ docker-compose exec --user=laradock workspace bash
 `/path/to/your/project`
 
 ```text
-composer create-project --prefer-dist laravel/laravel . "5.5.*"
+composer create-project --prefer-dist laravel/laravel . "5.7.*"
 ```
 
 ---
