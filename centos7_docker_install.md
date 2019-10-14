@@ -5,7 +5,7 @@
 - CentOS 7.5
 - Docker
 - Laravel
-- Nginx
+- Apache
 - PHP-FPM
 - MySQL
 - Redis
@@ -89,6 +89,8 @@ end
 
 ### vagrant up
 
+`vagrant plugin install vagrant-vbguest`
+
 `vagrant up`
 
 `vagrant ssh`
@@ -111,9 +113,9 @@ alias dce='docker-compose exec'
 alias dup='docker-compose up -d'
 alias dps='docker-compose ps'
 alias stop='cd /vagrant/laradock ; docker-compose stop'
-alias run='cd /vagrant/laradock ; docker-compose up -d workspace nginx php-fpm mysql dynamodb redis mailhog'
+alias run='cd /vagrant/laradock ; docker-compose up -d workspace apache2 php-fpm mysql dynamodb redis mailhog'
 alias workspace='cd /vagrant/laradock ; docker-compose exec --user=laradock workspace bash'
-alias nginx='cd /vagrant/laradock ; docker-compose exec nginx bash'
+alias apache2='cd /vagrant/laradock ; docker-compose exec apache2 bash'
 alias mysql='cd /vagrant/laradock ; docker-compose exec mysql bash'
 ```
 
@@ -129,11 +131,68 @@ alias mysql='cd /vagrant/laradock ; docker-compose exec mysql bash'
 
 ---
 
+### ADD DynamoDB local
+
+```bash
+cd laradoc
+mkdir dynamodb
+vi docker-compose.yml
+```
+
+```docker-compose.yml
+### DynamoDB ################################################
+    dynamodb:
+      image: instructure/dynamo-local-admin
+      volumes:
+          - ./dynamodb:/var/lib/dynamodb
+      ports:
+          - "8000:8000"
+      networks:
+        - backend
+```
+
+### Preparation
+
+```bash
+cd ../../
+cp env-example .env
+cp apache2/sites/default.apache.conf apache2/sites/lara.test.conf
+vi apache2/sites/lara.test.conf
+```
+
+```text
+<VirtualHost *:80>
+  ServerName lara.test
+  DocumentRoot /var/www/lara.test/public/
+  Options Indexes FollowSymLinks
+
+  <Directory "/var/www/lara.test/public/">
+    AllowOverride All
+    <IfVersion < 2.4>
+      Allow from all
+    </IfVersion>
+    <IfVersion >= 2.4>
+      Require all granted
+    </IfVersion>
+  </Directory>
+
+</VirtualHost>
+```
+
+```bash
+vi .env
+```
+
+```text
+PHP_VERSION=7.3
+MYSQL_VERSION=5.7
+```
+
 ### docker up
 
 `/vagrant/laradock`
 
-- Nginx (Web Server)
+- Apache2 (Web Server)
 - PHP-FPM (Fast CGI)
 - MySQL (Database)
 - Redis (KVS Cache)
@@ -142,7 +201,7 @@ alias mysql='cd /vagrant/laradock ; docker-compose exec mysql bash'
 - workspce
 
 ```text
-docker-compose up -d nginx php-fpm mysql redis dynamodb mailhog workspace
+docker-compose up -d apache2 php-fpm mysql redis dynamodb mailhog workspace
 ```
 
 ---
