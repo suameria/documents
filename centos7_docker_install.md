@@ -5,7 +5,7 @@
 - CentOS 7.5
 - Docker
 - Laravel
-- Apache
+- Nginx
 - PHP-FPM
 - MySQL
 - Redis
@@ -113,9 +113,9 @@ alias dce='docker-compose exec'
 alias dup='docker-compose up -d'
 alias dps='docker-compose ps'
 alias stop='cd /vagrant/laradock ; docker-compose stop'
-alias run='cd /vagrant/laradock ; docker-compose up -d workspace apache2 php-fpm mysql dynamodb redis mailhog'
+alias run='cd /vagrant/laradock ; docker-compose up -d workspace nginx php-fpm mysql dynamodb redis mailhog'
 alias workspace='cd /vagrant/laradock ; docker-compose exec --user=laradock workspace bash'
-alias apache2='cd /vagrant/laradock ; docker-compose exec apache2 bash'
+alias nginx='cd /vagrant/laradock ; docker-compose exec nginx bash'
 alias mysql='cd /vagrant/laradock ; docker-compose exec mysql bash'
 ```
 
@@ -156,27 +156,16 @@ vi docker-compose.yml
 ```bash
 cd ../../
 cp env-example .env
-cp apache2/sites/default.apache.conf apache2/sites/lara.test.conf
-vi apache2/sites/lara.test.conf
+cd laradock/nginx/sites
+cp laravel.conf.example lara.test.conf
+vi lara.test.conf
 ```
 
-```text
-<VirtualHost *:80>
-  ServerName lara.test
-  DocumentRoot /var/www/lara.test/public/
-  Options Indexes FollowSymLinks
-
-  <Directory "/var/www/lara.test/public/">
-    AllowOverride All
-    <IfVersion < 2.4>
-      Allow from all
-    </IfVersion>
-    <IfVersion >= 2.4>
-      Require all granted
-    </IfVersion>
-  </Directory>
-
-</VirtualHost>
+```lara.test.conf
+server_name lara.test
+root /var/www/lara.test/public
+error_log /var/log/nginx/lara.test_error.log;
+access_log /var/log/nginx/lara.test_access.log;
 ```
 
 ```bash
@@ -192,7 +181,7 @@ MYSQL_VERSION=5.7
 
 `/vagrant/laradock`
 
-- Apache2 (Web Server)
+- Nginx (Web Server)
 - PHP-FPM (Fast CGI)
 - MySQL (Database)
 - Redis (KVS Cache)
@@ -201,7 +190,7 @@ MYSQL_VERSION=5.7
 - workspce
 
 ```text
-docker-compose up -d apache2 php-fpm mysql redis dynamodb mailhog workspace
+docker-compose up -d nginx php-fpm mysql redis dynamodb mailhog workspace
 ```
 
 ---
