@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/centos-7.5"
+  # config.vm.box_check_update = false
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+  config.vm.network "private_network", ip: "192.168.33.13"
+  # config.vm.network "public_network"
+  config.vm.synced_folder "..", "/vagrant"
+  config.vm.provider "virtualbox" do |vb|
+    # vb.gui = true
+    vb.memory = "1024"
+    vb.name = "centos-7.7-ec-cube"
+  end
+  config.vm.provision "shell", inline: <<-SHELL
+    yum -y update
+    yum install -y yum-utils device-mapper-persistent-data lvm2
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    yum install -y docker-ce docker-ce-cli containerd.io
+    curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    base=https://github.com/docker/machine/releases/download/v0.16.0
+    curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine
+    install /tmp/docker-machine /usr/local/bin/docker-machine
+    usermod -aG docker vagrant
+    systemctl start docker
+    systemctl enable docker
+    localectl set-locale LANG=ja_JP.UTF-8
+    timedatectl set-timezone Asia/Tokyo
+  SHELL
+end

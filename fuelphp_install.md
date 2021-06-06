@@ -129,9 +129,8 @@ source /etc/locale.conf
 ## 日本時間の設定
 
 ```
-date または timedatectl
-sudo timedatectl set-timezone Asia/Tokyo
-date または timedatectl
+timedatectl set-timezone Asia/Tokyo
+timedatectl
 ```
 
 ## シンボリックリンク作成
@@ -165,11 +164,13 @@ yum -y update
 ## firewalld
 
 ```
+firewall-cmd --list-all
 systemctl start firewalld.service
 systemctl enable firewalld.service
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --reload
+firewall-cmd --list-all
 ```
 
 ## Nginxのインストール

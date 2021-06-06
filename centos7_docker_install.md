@@ -114,9 +114,11 @@ alias dup='docker-compose up -d'
 alias dps='docker-compose ps'
 alias stop='cd /vagrant/laradock ; docker-compose stop'
 alias run='cd /vagrant/laradock ; docker-compose up -d workspace nginx php-fpm mysql dynamodb redis mailhog'
-alias workspace='cd /vagrant/laradock ; docker-compose exec --user=laradock workspace bash'
+alias workspace='cd /vagrant/laradock ; docker-compose exec workspace bash'
 alias nginx='cd /vagrant/laradock ; docker-compose exec nginx bash'
 alias mysql='cd /vagrant/laradock ; docker-compose exec mysql bash'
+alias phpfpm='cd /vagrant/laradock ; docker-compose exec php-fpm bash'
+alias dynamodb='cd /vagrant/laradock ; docker-compose exec dynamodb bash'
 ```
 
 ---

@@ -1,0 +1,195 @@
+Git構築手順書
+
+Gitを使えるようにするためGit Bash(コマンドプロンプト)をローカルPCにインストールする
+
+インストールが完了したらGit Bashを起動
+
+ユーザーのホームディレクトリに移動
+cd ~
+
+gitのグローバル設定を行うため.gitconfigの作成をする
+git config --global user.name '任意の自分の名前'
+git config --global user.email '任意のメールアドレス{できれば会社の自分が持っているメールアドレス}'
+
+上記で最低限必要な.gitconfigが作成される
+確認はls -alで.gitconfigがユーザーのホームディレクトリにあるのでviやless等のコマンドを用いて確認ができる
+
+※gitのグローバル設定とは
+gitを使用する際に先に.gitconfigに記載してあるものが優先される
+もし、グローバル設定されたものを読み込みたくなければ後述するローカルリポジトリの.gitディレクトリ配下にあるconfigに記載すれば、そのconfigファイルが優先される
+
+SSHの設定を行う
+ls -alでユーザーのホームディレクトリに.sshがあるのか確認
+無ければユーザーのホームディレクトリに.sshのディレクトリを作成
+
+mkdir .ssh
+cd .ssh
+
+一般的に用いるRSAの暗号方式で秘密鍵と公開鍵の作成
+ssh-keygen -t rsa
+
+例）
+Generating public/private rsa key pair.
+Enter file in which to save the key (/Users/rey/.ssh/id_rsa):  <--- 一旦このディレクトリに作成して空エンター
+Enter passphrase (empty for no passphrase): <--- 任意のパスワードを入力
+Enter same passphrase again: <--- 再確認のためもう一度同じパスワードを入力
+Your identification has been saved in /Users/rey/.ssh/id_rsa.
+Your public key has been saved in /Users/rey/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:xdbqbqXwac7hK4U44n47ZSpS8NW0Ja3uRe9Nr0lehiI rey@ameria.local
+The key's randomart image is:
++---[RSA 3072]----+
+|         .       |
+|        o.o.     |
+|       o =+ .    |
+|  .   . +o..     |
+|   o . oSo..     |
+|    + o *.o o .. |
+|   o . * =E=.oo.o|
+|  . o + o+*o.+.+.|
+|   o.o.o =*.  +. |
++----[SHA256]-----+
+
+秘密鍵と公開鍵の作成されたのか確認
+ls -al
+id_rsa(秘密鍵)及びid_rsa.pub(公開鍵)の2つのファイルが生成されているのがわかる
+
+鍵の整理をするためディレクトリを作成する
+mkdir github
+
+作成した秘密鍵と公開鍵をgithubディレクトリに移動させる
+mv id_rsa* github
+
+移動したのか確認
+cd github
+ls -al
+
+SSHの設定ファイルの作成
+cd ~/.ssh
+vi config
+
+例)下記入力する
+Host github.com <--- 実際に接続する時に使う名前（自由に決めてOK）
+    HostName github.com <--- DNS名やIPアドレス
+    Port 22 <--- SSHのポート番号(GitHubの場合は22でOK)
+    User rey <--- 接続ユーザー名(GitHubで登録されたユーザー名)
+    identityFile ~/.ssh/github/id_rsa <--- 秘密鍵の絶対パス
+    IdentitiesOnly yes <--- IdentityFileで指定した秘密鍵に限定するかどうか（yes/no）
+    TCPKeepAlive yes <--- 接続が有効であるか確認通知を出すかどうか（yes/no）
+
+
+公開鍵をGitHubに登録する
+cd ~/.ssh/github
+vi id_rsa.pub <--- 公開鍵を開いて全コピ
+
+GitHubにログインをする
+GitHubの設定画面に移動する
+SSH and GPG keys の画面を開く
+New SSH key のボタンを押下する
+
+Title (任意)
+Key (先程のid_rsa.pubの公開鍵の内容を貼り付ける)
+
+Add SSH key ボタンを押下し登録をする
+
+
+GitHubにリモートリポジトリを作成
+
+右上部にプラスのアイコンがあるので押下する
+New Repositoryを押下する
+
+Repository name <--- リポジトリの名前を決める
+
+リポジトリをPrivateにし公開しないようにしておく(デフォルトがPublicになっているので注意)
+
+Create Repositoryを押下する
+
+
+GitBashでローカルリポジトリを作成する
+
+ユーザーのホームディレクトリに移動
+cd ~
+
+作業ディレクトリの作成
+mkdir -p workspace/codes
+cd workspace/codes
+
+ローカルリポジトリの作成(できるだけわかりやすくリモートリポジトリを作成した名前と同じようにしておく)
+mkdir {リモートリポジトリと同じ名前}
+cd {リモートリポジトリと同じ名前}
+git init
+
+リモートリポジトリの確認
+git remote -v
+リモートリポジトリの登録をしていないのでコンソールには何も出力されないことがわかる
+
+リモートリポジトリと接続するために接続登録を行う
+*2段階認証を済ませていることが前提
+*2段階認証のためhttpsでの接続ではなくsshでの接続をする
+
+例）
+git remote add origin git@github.com:{user_name}/test1.git
+
+リモートリポジトリが登録されたのか確認
+git remote -v
+
+例）
+origin	git@github.com:{user_name}/test1.git (fetch)
+origin	git@github.com:{user_name}/test1.git (push)
+
+テストファイルを作成する
+touch test1.txt
+
+Gitのイメージを把握するため下記URLにて確認
+https://neurathsboat.blog/post/git-intro/
+
+現在の状態を確認
+git status
+
+例)
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	test1.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+
+リモートリポジトリにプッシュをを行う
+
+git add test1.txt
+
+*複数ファイルを一気にaddしたい場合
+上記は1ファイルを上げる方法だが複数一気に上げる方法として下記コマンドでできる
+git add .
+
+
+現在の状態を確認
+git status
+
+例)
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   test1.txt
+
+git commit test1.txt -m '{コミットメッセージ}'
+
+*複数ファイルを一気にcommitしたい場合
+git commit -m '{コミットメッセージ}'
+
+
+現在の状態を確認
+git status
+
+例)
+On branch master
+nothing to commit, working tree clean
+
+masterブランチをプッシュする
+git push origin master
+
+
+GitHubのリモートリポジトリを確認する
+masterブランチにtest1.txtが上がっていることがわかる
+
