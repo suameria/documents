@@ -1,0 +1,15 @@
+[Unit]
+Description=Manage DynamoDB service
+Documentation=http://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/DynamoDBLocal.html
+After=network.target
+
+[Service]
+Environment="DYNAMODB_HOME=/usr/local/sbin/dynamodb"
+Environment="DYNAMODB_LISTEN_PORT=8000"
+ExecStart=/bin/java -Djava.library.path=${DYNAMODB_HOME}/DynamoDBLocal_lib -jar ${DYNAMODB_HOME}/DynamoDBLocal.jar -dbPath ${DYNAMODB_HOME} -sharedDb -port ${DYNAMODB_LISTEN_PORT}
+ExecStop=/bin/kill -QUIT $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

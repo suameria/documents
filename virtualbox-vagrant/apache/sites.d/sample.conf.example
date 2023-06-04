@@ -1,0 +1,26 @@
+<VirtualHost *:80>
+  ServerName sample.test
+  RewriteEngine on
+  RewriteCond %{HTTP_HOST} ^sample\.test
+  RewriteRule ^/(.*)$ https://sample.test/$1 [R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerName sample.test
+  DocumentRoot /var/www/sample/public
+
+  # ログ
+  ErrorLog logs/sample.test_ssl_error_log
+  CustomLog logs/sample.test_ssl_access_log combined
+
+  SSLEngine on
+  SSLProtocol all
+  SSLCertificateFile /etc/httpd/ssl.d/sample.test.crt
+  SSLCertificateKeyFile /etc/httpd/ssl.d/sample.test.key
+
+  <Directory "/var/www/sample/public">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>

@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage MailHog service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/sbin/mailhog
+ExecStop=/bin/kill -QUIT $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

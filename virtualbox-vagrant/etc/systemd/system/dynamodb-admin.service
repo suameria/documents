@@ -1,0 +1,11 @@
+[Unit]
+Description=Manage DynamoDB-Admin service
+
+[Service]
+ExecStart=/usr/local/sbin/dynamodb-admin
+ExecStop=/bin/kill -QUIT $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

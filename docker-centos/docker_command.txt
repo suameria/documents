@@ -1,0 +1,220 @@
+# docker command
+
+## Image
+
+- イメージ一覧
+
+```sh
+docker images
+```
+
+- イメージ単体削除
+
+```sh
+docker rmi {image id}
+```
+
+- イメージ一括削除
+
+```sh
+docker rmi -f $(docker images -q)
+```
+
+- タグなしのイメージをすべて削除
+
+```sh
+docker rmi $(docker images | grep '<none>' | awk '{print$3}')
+```
+
+- イメージの作成
+
+```sh
+docker-compose build
+```
+
+---
+
+## Container
+
+- 起動しているコンテナの表示
+
+```sh
+docker ps
+```
+
+- 停止しているコンテナの表示
+
+```sh
+docker ps -a
+```
+
+- コンテナ単体削除
+
+```sh
+docker rm {container id}
+```
+
+- コンテナ一括削除
+
+```sh
+docker rm $(docker ps -aq)
+```
+
+- 停止中のコンテナ一括削除
+
+```sh
+docker container prune
+```
+
+---
+
+## Volume
+
+- ボリューム一覧
+
+```sh
+docker volume ls
+```
+
+---
+
+## Docker Compose
+
+- Dockerの起動
+
+`-dでバックグラウンド起動`
+
+```sh
+docker-compose up -d
+```
+
+- コンテナに入る
+
+```sh
+docker-compose exec {container name} bash
+```
+
+- コンテナの停止
+
+```sh
+docker-compose stop
+```
+
+- 停止しているコンテナの一掃
+
+```sh
+docker-compose down
+```
+
+- イメージの取得
+
+```sh
+docker pull {REPOSITORY}[:TAG]
+```
+
+- イメージからコンテナ起動
+
+```sh
+docker run -it --name {any_container_name} {REPOSITORY}[:TAG] bash
+```
+
+- カスタムイメージの作成(メッセージ付き)
+
+```sh
+docker commit -m="any_message" {container_id} {REPOSITORY}[:TAG]
+```
+
+- イメージの履歴を確認
+
+`上記コミットメッセージを確認することもできる`
+
+```sh
+docker history {image_id}
+```
+
+- 外部接続するためにポート公開
+
+```text
+-p 8080:80
+```
+
+- 外部ファイルの取り込み
+
+```text
+-v $(pwd):/var/www
+```
+
+- 定形
+
+```sh
+docker run -it --name centos7.9-apache -p 80:80 centos:centos7.9-apache bash
+```
+
+`-iとは`
+
+```sh
+interactiveのこと
+下記のように-iだけでコンテナを立ち上げる
+そうするとコマンドを打ち返答は返ってくるが、おかしなことに
+{user}@{host}のように接続情報がない
+これは後述する-tであるttyがないからである
+
+docker run -i --name test01 {image_id}
+
+tty
+not a tty
+
+ps
+  PID TTY          TIME CMD
+    1 ?        00:00:00 bash
+   10 ?        00:00:00 ps
+
+exit
+
+exitすればコンテナから抜け出し同時にコンテナも停止する
+```
+
+`-tとは`
+
+```sh
+https://wa3.i-3-i.info/word11668.html
+
+docker run -it --name test01 {image_id}
+コンテナを立ち上げてttyを打ち下記のようにつないでいるデバイス情報となる
+/dev/pts/0
+別ターミナルを開き上記で作成したコンテナに入る
+docker exec -it {container_id} bash
+ttyと打つと別のデバイス情報として返ってくる
+/dev/pts/1
+ターミナルから抜けるとコンテナは止まる
+
+*ちなみに-iがない状態でコンテナを作成すると
+docker run -t --name test01 {image_id}
+この状態だとコンテナに接続しっぱなしになる
+つまりコンテナはずっと立ち上がっている状態である
+また-iをつけていないので何も応答が返ってこないので抜け出せなくなるのでターミナルを閉じるしかない
+```
+
+```text
+上記のことから-iと-tは同時に使用する
+-itのように使用する
+```
+
+`-dとは`
+
+```sh
+デタッチのことを表す
+https://qiita.com/R_R/items/40d256389b59b66eaf6b
+
+docker run -it -d --name test01 {image_id}
+d95f10407df8ea8c04aba67f0148c08fba13d89bb7daa30a5e91a1b955539be9
+
+上記のように-dを指定することでデタッチしたことによりバックグラウンドでコンテナが起動している状態になる
+
+*ちなみに-dだけだと切り離し、コンテナを起動したと同時にすぐにコンテナが停止してしまう
+なので下記のどちらかで立ち上げるようにする
+
+docker run -id --name test01 {image_id}
+docker run -td --name test01 {image_id}
+docker run -itd --name test01 {image_id}
+```
